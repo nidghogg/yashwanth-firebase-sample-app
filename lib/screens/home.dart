@@ -25,6 +25,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   initState() {
     initMsg();
+    FirebaseMessaging.onMessage.listen((message) async {
+      if (context.mounted) {
+        Dialogs.showSnackbar(
+          context,
+          message.notification!.title,
+          message.notification!.body,
+        );
+      }
+    });
     super.initState();
   }
 
@@ -50,21 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return TextButton(onPressed: logOut, child: const Text('SignOut'));
   }
 
-  @override
-  void didChangeDependencies() {
-    try {
-      FirebaseMessaging.onMessage.listen((message) async {
-        Dialogs.showSnackbar(
-          context,
-          message.notification!.title,
-          message.notification!.title,
-        );
-      });
-    } catch(e) {
-      print(e);
-    }
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   try {
+  //
+  //   } catch(e) {
+  //     print(e);
+  //   }
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -179,15 +182,14 @@ class _SendNotificationsState extends State<SendNotifications> {
                                     if (!_formKey.currentState!.validate()) {
                                       return;
                                     }
-
                                     _formKey.currentState!.save();
-
                                     APIs.sendPushNotification(
                                         widget.token!,
                                         _msg.text,
                                       _body.text
-                                    );
-                                    Navigator.of(context).pop();
+                                    ).whenComplete(() {
+                                      Navigator.of(context).pop();
+                                    });
                                   } ,
                                   child: Text('Send')
                               )
