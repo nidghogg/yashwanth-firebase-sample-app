@@ -23,17 +23,24 @@ class _LoginRegisterUserState extends State<LoginRegisterUser> {
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;
+        _emailController.clear();_passwordController.clear();
       });
     }
   }
 
   Future<void> register() async {
     try {
-      await Auth().register(
-          email: _emailController.text, pass: _passwordController.text);
+      await Auth().register(email: _emailController.text, pass: _passwordController.text).whenComplete(() {
+        setState(() {
+          _passwordController.clear();
+          isLogin = true;
+        });
+      });
+
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;
+        _emailController.clear();_passwordController.clear();
       });
     }
   }
@@ -81,7 +88,14 @@ class _LoginRegisterUserState extends State<LoginRegisterUser> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _textField('Email', _emailController),
-                _textField('Password', _passwordController),
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                      labelText: 'Password',
+
+                  ),
+                  obscureText: true,
+                ),
                 _errorMessage(),
                 _submit(),
                 _logButton()
